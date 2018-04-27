@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Windows default autosave extension
+*.asv
+# Matlab data files 
+*.mat
+*.fig 
+*.eps
