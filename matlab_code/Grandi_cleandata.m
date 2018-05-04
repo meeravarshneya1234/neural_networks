@@ -1,6 +1,6 @@
 %% Remove APs with EADs before the perturbation 
-load('Grandi_1000rawpop.mat')
-
+%load('Grandi_1000rawpop.mat')
+load('Grandi_5000_5.3.mat')
 x = datatable.ctl.times;
 y = datatable.ctl.V;
 
@@ -17,9 +17,9 @@ hold on
 cellfun(@(x,y) plot(x,y,'linewidth',2),x,y)
 title('Original - after perturbation')
 
-t_cutoff = 4;
+t_cutoff = 2;
 flag = 0;
-[APfails,EADs] = cleandata(datatable.ctl.APDs,datatable.ctl.times,datatable.ctl.V,t_cutoff,flag);
+[APfails,EADs] = cleandata2(datatable.ctl.APDs,datatable.ctl.times,datatable.ctl.V,t_cutoff,flag);
 [number_of_failed,ind_failed] = find(APfails ==1); % number of failed to repolarize
 [number_of_EADs,ind_EADs] = find(EADs==1); % number of EADs
 
@@ -54,7 +54,7 @@ cellfun(@(x,y) plot(x,y,'linewidth',2),x2,y2)
 title('Cleaned Data- after perturbation')
 
 %% Separate APs based on whether EAD occured after the perturbation 
-[APfails,EADs] = cleandata(clean_datatable.APDs(:,2),clean_datatable.times(:,2),clean_datatable.V(:,2),1);
+[APfails,EADs] = cleandata2(clean_datatable.APDs(:,2),clean_datatable.times(:,2),clean_datatable.V(:,2),t_cutoff,flag);
 %large_APDs = (clean_datatable.APDs(:,2)>700); % specifcally made for this case, AP had an EAD but was not detected 
 % by cleandata function
 
@@ -102,6 +102,17 @@ hold on
 cellfun(@(x,y) plot(x,y,'linewidth',2),x4,y4)
 title(['After perturbation APs formed EADs = ' num2str(length(x4))])
 
+% inds = round(linspace(1,length(x4),20));
+% for i = 1:length(inds)-1
+%     figure
+%     hold on
+%     cellfun(@(x,y) plot(x,y,'linewidth',2),x4(inds(i):inds(i+1)),y4(inds(i):inds(i+1)))
+% end
+
+
+% [APfails,EADs] = cleandata2(no_EADs.APDs(300:400,2),no_EADs.times(300:400,2),no_EADs.V(300:400,2),t_cutoff,flag);
+% 
+
 %% 
 NN_train_y = EADs + APfails; 
 NN_train_y = NN_train_y';
@@ -116,12 +127,55 @@ end
 y0 = y0'; 
 y0(:,end+1) = NN_train_y;
 
-fid = fopen('population_data.dat', 'w');
-fwrite(fid, 'y0');
-fclose(fid);
-fid = fopen('population_data.dat','r');
-datacell = textscan(fid, '%f%f%f', 'HeaderLines', 1, 'Collect', 1);
-csvwrite('population_data.csv',y0)
-type 'population_data.dat'
+%pathname = 'C:/Users/MeeraVarshneya/Documents/MATLAB/neural_networks/matlab_code/APs';
 
-%X_matrix = (y0 - min(y0,[],2))./(max(y0,[],2) - min(y0,[],2));
+% for i = 1:length(clean_datatable.times(:,1))
+%     figure
+%     h = axes;
+%     plot(clean_datatable.times{i,1},clean_datatable.V{i,1},'k','linewidth',2);
+%     ylim([-100 60])
+%     set(gcf,'units','pixels','position',[489,398,281 253])
+%     set(h,'Visible','off')
+%     figfile = fullfile(pathname,['AP' num2str(i) '_' num2str(y0(i,end)) '.jpg']);
+%     saveas(gcf,figfile)    
+%     close(gcf)
+% end 
+
+%
+% figure
+% handle = gcf;
+% for i = 1:length(clean_datatable.times(:,1))
+%     figure(handle) 
+%     hold on
+%     if y0(i,end) == 0 
+%         plot(i,clean_datatable.APDs(i,1),'bo')
+%     else 
+%         plot(i,clean_datatable.APDs(i,1),'ro')
+%     end        
+% end 
+
+figure
+handle = gcf;
+for i = 1:length(clean_datatable.times(:,1))
+    figure(handle) 
+    hold on
+    Vpeak = max(clean_datatable.V{i,1});
+    if y0(i,end) == 0 
+        plot(1,Vpeak,'bo')
+    else 
+        plot(2,Vpeak,'ro')
+    end        
+end 
+figure
+handle = gcf;
+for i = 1:length(clean_datatable.times(:,1))
+    figure(handle) 
+    hold on
+    if y0(i,end) == 0 
+        plot(0,clean_datatable.APDs(i,1),'bo')
+    else 
+        plot(1,clean_datatable.APDs(i,1),'ro')
+    end        
+end 
+
+boxplot(clean_datatable.APDs(:,1),y0)

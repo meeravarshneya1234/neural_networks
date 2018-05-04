@@ -1,41 +1,43 @@
-% settings.model_name = 'Grandi';
-% %modelnames = {'TT06','Ohara'};
-% % options - 'Fox', 'Hund', 'Livshitz',
-% % 'Devenyi','Shannon','TT04','TT06','Grandi','Ohara'
-% % 'TT06_opt','Grandi_opt','Ohara_opt'
-% 
-% settings.celltype = 'endo'; % size should be same as model_name, enter one for each model
-% % options only available for human models - 'epi', 'endo', 'mid',
-% 
-% settings.PCL =1000 ;  % Interval bewteen stimuli,[ms]
-% settings.stim_delay = 100 ; % Time the first stimulus, [ms]
-% settings.stim_dur = 2 ; % Stimulus duration
-% settings.stim_amp = 20.6; % Stimulus amplitude 
-% settings.nBeats = 100 ; % Number of beats to simulate 
-% settings.numbertokeep =1;% Determine how many beats to keep. 1 = last beat, 2 = last two beats
-% settings.steady_state = 1;
-% 
-% % Ks and Kr scaling must have the same length vector. Mainly change
-% % Ks_scale and Kr_scale when you want to test what different ratios of the
-% % two look like 
-% settings.Ks_scale = 1; % perturb IKs, set to 1 for baseline
-% settings.Kr_scale = 1; % perturb IKr, set to 1 for baseline
-% Ca_scale = [1 1.5]; % perturb ICaL, set to 1 for baseline
-% 
-% settings.variations = 1000;
-% settings.sigma = 0.2;
-% settings.scalings = exp(settings.sigma*randn(18,settings.variations))' ; % same parameter variation for each pop
-% 
-% %%     
-% str = {'ctl','exp'};
-% for i = 1:length(Ca_scale) 
-%     settings.Ca_scale = Ca_scale(i);
-%     X = pop_program(settings);  
-%     datatable.(str{i}) = X;  
-% end 
+settings.model_name = 'Grandi';
+%modelnames = {'TT06','Ohara'};
+% options - 'Fox', 'Hund', 'Livshitz',
+% 'Devenyi','Shannon','TT04','TT06','Grandi','Ohara'
+% 'TT06_opt','Grandi_opt','Ohara_opt'
+
+settings.celltype = 'endo'; % size should be same as model_name, enter one for each model
+% options only available for human models - 'epi', 'endo', 'mid',
+
+settings.PCL =1000 ;  % Interval bewteen stimuli,[ms]
+settings.stim_delay = 100 ; % Time the first stimulus, [ms]
+settings.stim_dur = 2 ; % Stimulus duration
+settings.stim_amp = 20.6; % Stimulus amplitude 
+settings.nBeats = 100 ; % Number of beats to simulate 
+settings.numbertokeep =1;% Determine how many beats to keep. 1 = last beat, 2 = last two beats
+settings.steady_state = 1;
+
+% Ks and Kr scaling must have the same length vector. Mainly change
+% Ks_scale and Kr_scale when you want to test what different ratios of the
+% two look like 
+settings.Ks_scale = 1; % perturb IKs, set to 1 for baseline
+settings.Kr_scale = 1; % perturb IKr, set to 1 for baseline
+Ca_scale = [1 1.5]; % perturb ICaL, set to 1 for baseline
+
+settings.variations = 5000;
+settings.sigma = 0.2;
+settings.scalings = exp(settings.sigma*randn(18,settings.variations))' ; % same parameter variation for each pop
+
+%%     
+str = {'ctl','exp'};
+for i = 1:length(Ca_scale) 
+    settings.Ca_scale = Ca_scale(i);
+    X = pop_program(settings);  
+    datatable.(str{i}) = X;  
+end 
+
+%%
 for i = 1:length((str))
     figure
-    for ii = 1:1000 % only plot the first 20 for the figure
+    for ii = 1:settings.variations % only plot the first 20 for the figure
         plot(datatable.(str{i}).times{ii},datatable.(str{i}).V{ii},'linewidth',2)
         hold on
     end
@@ -94,7 +96,7 @@ for i = 1:length(modelnames)
     hold on
     cellfun(@(x,y) plot(x,y,'linewidth',2),x,y)
     title([modelnames{i} ' noEADs'])  
-    withEADs(i) = 1000 - length(x);
+    withEADs(i) = 5000 - length(x);
 %     
 %     if noEADs(i) > 0 
 %        settings.model_name = modelnames{i};
@@ -114,3 +116,14 @@ for i = 1:length(modelnames)
 %     end 
     
 end 
+%%
+% for i = 1:length(clean_datatable.times(:,1))
+%     figure
+%     h = axes;
+%     plot(clean_datatable.times{i,1},clean_datatable.V{i,1},'k','linewidth',2);
+%     %ylim([-100 50])
+%     set(gcf,'units','pixels','position',[489,398,281 253])
+%     set(h,'Visible','off')
+%     saveas(gcf,[num2str(i) '.jpg'])    
+%     close(gcf)
+% end 
